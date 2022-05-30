@@ -1,4 +1,4 @@
-namespace EmployeeReportingAdvanced.Tests;
+namespace EmployeeReportingAdvanced;
 
 public class Employee
 {

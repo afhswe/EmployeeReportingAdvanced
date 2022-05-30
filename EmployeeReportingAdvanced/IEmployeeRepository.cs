@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace EmployeeReportingAdvanced.Tests;
+namespace EmployeeReportingAdvanced;
 
 public interface IEmployeeRepository
 {

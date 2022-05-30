@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EmployeeReportingAdvanced.Tests;
+namespace EmployeeReportingAdvanced;
 
 public class EmployeeReportingService
 {
@@ -14,8 +14,20 @@ public class EmployeeReportingService
 
     public void RetrieveAvailableEmployees()
     {
-        AllAvailableEmployees = employeeRepository.GetAvailableEmployees().ToList();
+        SetAvailableEmployees();
         SetFullAgeEmployees();
+
+        if (AllAvailableEmployees.Count < 3)
+        {
+            Console.WriteLine("*********************************************");
+            Console.WriteLine($"WARNING: only {AllAvailableEmployees.Count} employee(s) available");
+            Console.WriteLine("*********************************************");
+        }
+    }
+
+    private void SetAvailableEmployees()
+    {
+        AllAvailableEmployees = employeeRepository.GetAvailableEmployees().ToList();
     }
 
     private void SetFullAgeEmployees()
@@ -46,5 +58,15 @@ public class EmployeeReportingService
         return FullAgedEmployees
             .Where(e => (e.ExperienceLevel == ExperienceLevel.Senior && e.JobType == JobType.Salesperson) ||
                         e.JobType == JobType.Manager).ToList();
+    }
+
+    public void PrintEmployees(List<Employee> listEmployeesAllowedToWorkOnWeekends)
+    {
+        Console.WriteLine();
+        listEmployeesAllowedToWorkOnWeekends.ForEach(
+            e =>
+            {
+                Console.WriteLine($"{e.Name}, {e.Age}, {e.JobType}, {e.ExperienceLevel}");
+            });
     }
 }
