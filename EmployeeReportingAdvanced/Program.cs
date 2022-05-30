@@ -11,7 +11,7 @@ var employees = new List<Employee>()
 };
 
 var employeeRepository = new InMemoryEmployeeRepository(employees);
-var employeeReportingService = new EmployeeReportingService(employeeRepository);
+var employeeReportingService = new EmployeeReportingService(employeeRepository, null);
 employeeReportingService.RetrieveAvailableEmployees();
 
 Console.WriteLine("----------------------------------------");

@@ -6,14 +6,16 @@ namespace EmployeeReportingAdvanced;
 public class EmployeeReportingService
 {
     private readonly IEmployeeRepository employeeRepository;
+    private IEmployeeNotificationService employeeNotificationService;
 
     private List<Employee> FullAgedEmployees { get; set; }
 
-    public Dictionary<string, Employee> AllAvailableEmployees { get; private set; }
+    private List<Employee> AllAvailableEmployees { get; set; }
 
-    public EmployeeReportingService(IEmployeeRepository employeeRepository)
+    public EmployeeReportingService(IEmployeeRepository employeeRepository, IEmployeeNotificationService employeeNotificationService)
     {
         this.employeeRepository = employeeRepository;
+        this.employeeNotificationService = employeeNotificationService;
     }
 
     public void RetrieveAvailableEmployees()
@@ -23,36 +25,41 @@ public class EmployeeReportingService
 
         if (AllAvailableEmployees.Count < 3)
         {
-            Console.WriteLine("*********************************************");
-            Console.WriteLine($"WARNING: only {AllAvailableEmployees.Count} employee(s) available");
-            Console.WriteLine("*********************************************");
+            SendWarningAboutTooFewAvailableEmployees();
         }
+    }
+
+    private void SendWarningAboutTooFewAvailableEmployees()
+    {
+        Console.WriteLine("*********************************************");
+        var message = $"WARNING: only {AllAvailableEmployees.Count} employee(s) available";
+        Console.WriteLine(message);
+        Console.WriteLine("*********************************************");
+
+        employeeNotificationService.SendWarningMessage(message);
     }
 
     private void SetAvailableEmployees()
     {
-        AllAvailableEmployees = new Dictionary<string, Employee>();
+        AllAvailableEmployees = new List<Employee>();
         var employees = employeeRepository.GetAvailableEmployees();
         foreach (var employee in employees)
         {
             AllAvailableEmployees.Add(
-                employee.Name, 
-                employee
+                new Employee(employee.Name, employee.Age, employee.JobType, employee.ExperienceLevel)
                 );
         }
     }
 
     private void SetFullAgeEmployees()
     {
-        FullAgedEmployees = employeeRepository
-            .GetAvailableEmployees()
-            .ToList()
+        FullAgedEmployees = AllAvailableEmployees
             .Where(e => e.Age >= 18).ToList();
     }
 
     public List<Employee> ListEmployees()
     {
-        return AllAvailableEmployees.Values.ToList();
+        return AllAvailableEmployees.ToList();
     }
 
     public List<Employee> ListEmployeesAllowedToWorkOnWeekends()
