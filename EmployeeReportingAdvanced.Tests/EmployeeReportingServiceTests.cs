@@ -46,8 +46,8 @@ public class EmployeeReportingServiceTests
         sut.RetrieveAvailableEmployees();
         var availableEmployeesResult = sut.ListEmployees();
         availableEmployeesResult.Count.Should().Be(2);
-        availableEmployeesResult[0].Should().BeSameAs(availableEmployeesResult[0]);
-        availableEmployeesResult[1].Should().BeSameAs(availableEmployeesResult[1]);
+        availableEmployeesResult[0].Should().BeSameAs(repositoryEmployees[0]);
+        availableEmployeesResult[1].Should().BeSameAs(repositoryEmployees[1]);
 
         employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
@@ -68,8 +68,8 @@ public class EmployeeReportingServiceTests
         var sut = new EmployeeReportingService(employeeRepository.Object);
         sut.RetrieveAvailableEmployees();
         var allowedEmployeesResult = sut.ListEmployeesAllowedToWorkOnWeekends();
-        allowedEmployeesResult.Should().Contain(repositoryEmployees[1]);
-        allowedEmployeesResult.Should().Contain(repositoryEmployees[3]);
+        allowedEmployeesResult[0].Should().BeSameAs(repositoryEmployees[1]);
+        allowedEmployeesResult[1].Should().BeSameAs(repositoryEmployees[3]);
 
         employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
@@ -90,8 +90,8 @@ public class EmployeeReportingServiceTests
         var sut = new EmployeeReportingService(employeeRepository.Object);
         sut.RetrieveAvailableEmployees();
         var allowedEmployeesResult = sut.ListEmployeesCashCollecting();
-        allowedEmployeesResult.Should().Contain(repositoryEmployees[0]);
-        allowedEmployeesResult.Should().Contain(repositoryEmployees[3]);
+        allowedEmployeesResult[0].Should().BeSameAs(repositoryEmployees[0]);
+        allowedEmployeesResult[1].Should().BeSameAs(repositoryEmployees[3]);
 
         employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }

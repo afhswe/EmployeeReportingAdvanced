@@ -7,6 +7,10 @@ public class EmployeeReportingService
 {
     private readonly IEmployeeRepository employeeRepository;
 
+    private List<Employee> FullAgedEmployees { get; set; }
+
+    public List<Employee> AllAvailableEmployees { get; private set; }
+
     public EmployeeReportingService(IEmployeeRepository employeeRepository)
     {
         this.employeeRepository = employeeRepository;
@@ -37,10 +41,6 @@ public class EmployeeReportingService
             .ToList()
             .Where(e => e.Age >= 18).ToList();
     }
-
-    private List<Employee> FullAgedEmployees { get; set; }
-
-    public List<Employee> AllAvailableEmployees { get; private set; }
 
     public List<Employee> ListEmployees()
     {
