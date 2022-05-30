@@ -10,7 +10,7 @@ var employees = new List<Employee>()
     new Employee("Henry Majors", 43, JobType.Salesperson, ExperienceLevel.Senior)
 };
 
-var employeeRepository = new InMemoryRepository(employees);
+var employeeRepository = new InMemoryEmployeeRepository(employees);
 var employeeReportingService = new EmployeeReportingService(employeeRepository);
 employeeReportingService.RetrieveAvailableEmployees();
 

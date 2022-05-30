@@ -1,10 +1,10 @@
-﻿using EmployeeReportingAdvanced;
+﻿namespace EmployeeReportingAdvanced;
 
-public class InMemoryRepository : IEmployeeRepository
+public class InMemoryEmployeeRepository : IEmployeeRepository
 {
     public List<Employee> Employees { get; }
 
-    public InMemoryRepository(List<Employee> employees)
+    public InMemoryEmployeeRepository(List<Employee> employees)
     {
         Employees = employees;
     }
