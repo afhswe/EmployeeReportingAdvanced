@@ -1,61 +1,93 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using Moq;
 using Xunit;
 using FluentAssertions;
 
-namespace EmployeeReportingAdvanced.Tests
+namespace EmployeeReportingAdvanced.Tests;
+
+public class EmployeeReportingServiceTests
 {
-    public class EmployeeReportingServiceTests
+    [Fact]
+    public void AddAvailableEmployees_UpdatesEmployeeList()
     {
-        [Fact]
-        public void AddAvailableEmployees_UpdatesEmployeeList()
+        var repositoryEmployees = new List<Employee>()
         {
-            var fakeEmployees = new List<Employee>()
-            {
-                new Employee("Mark Rogers", 20)
-            };
-            var employeeRepository = new Mock<IEmployeeRepository>();
-            employeeRepository.Setup(x => x.GetAvailableEmployees()).Returns(fakeEmployees);
+            new Employee("Andrea Huber", 17, JobType.Storeman, ExperienceLevel.Novice),
+        };
+        var employeeRepository = new Mock<IEmployeeRepository>();
+        employeeRepository.Setup(x => x.GetAvailableEmployees()).Returns(repositoryEmployees);
 
-            var sut = new EmployeeReportingService(employeeRepository.Object);
-            sut.RetrieveAvailableEmployees();
-            sut.AvailableEmployees.Count.Should().Be(1);
-            sut.AvailableEmployees[0].Should().BeSameAs(fakeEmployees[0]);
-        }
+        var sut = new EmployeeReportingService(employeeRepository.Object);
+        sut.RetrieveAvailableEmployees();
+        sut.AllAvailableEmployees.Count.Should().Be(1);
+        sut.AllAvailableEmployees[0].Should().BeSameAs(repositoryEmployees[0]);
+
+        employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
 
-    public class EmployeeReportingService
+    [Fact]
+    public void ListEmployees_ReturnsAllAvailableEmployees()
     {
-        private readonly IEmployeeRepository employeeRepository;
-
-        public EmployeeReportingService(IEmployeeRepository employeeRepository)
+        var repositoryEmployees = new List<Employee>()
         {
-            this.employeeRepository = employeeRepository;
-        }
+            new Employee("Andrea Huber", 17, JobType.Storeman, ExperienceLevel.Novice),
+            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate),
+        };
+        var employeeRepository = new Mock<IEmployeeRepository>();
+        employeeRepository.Setup(x => x.GetAvailableEmployees()).Returns(repositoryEmployees);
 
-        public void RetrieveAvailableEmployees()
-        {
-            AvailableEmployees = employeeRepository.GetAvailableEmployees().ToList();
-        }
+        var sut = new EmployeeReportingService(employeeRepository.Object);
+        sut.RetrieveAvailableEmployees();
+        var availableEmployees = sut.ListEmployees();
+        sut.AllAvailableEmployees.Count.Should().Be(2);
+        sut.AllAvailableEmployees[0].Should().BeSameAs(availableEmployees[0]);
+        sut.AllAvailableEmployees[1].Should().BeSameAs(availableEmployees[1]);
 
-        public List<Employee> AvailableEmployees { get; private set; }
+        employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
 
-    public interface IEmployeeRepository
+    [Fact]
+    public void ListEmployeesWeekendWork_ReturnsOnlyEmployees_AllowedToWorkOnWeekends()
     {
-        IEnumerable<Employee> GetAvailableEmployees();
+        var repositoryEmployees = new List<Employee>()
+        {
+            new Employee("Andrea Huber", 17, JobType.Storeman, ExperienceLevel.Novice),
+            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate),
+            new Employee("Marie Blanchet", 39, JobType.Salesperson, ExperienceLevel.Novice),
+            new Employee("Henry Majors", 43, JobType.Salesperson, ExperienceLevel.Senior),
+        };
+        var employeeRepository = new Mock<IEmployeeRepository>();
+        employeeRepository.Setup(x => x.GetAvailableEmployees()).Returns(repositoryEmployees);
+
+        var sut = new EmployeeReportingService(employeeRepository.Object);
+        sut.RetrieveAvailableEmployees();
+        var employeesAllowedResult = sut.ListEmployeesAllowedToWorkOnWeekends();
+        sut.FullAgedEmployees.Should().Contain(repositoryEmployees[1]);
+        sut.FullAgedEmployees.Should().Contain(repositoryEmployees[3]);
+
+        employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
 
-    public class Employee
+    [Fact]
+    public void ListEmployeesCashCollecting_ReturnsOnlyEmployees_AllowedToCollectCash()
     {
-        public string Name { get; }
-        public int Age { get; }
-
-        public Employee(string name, int age)
+        var repositoryEmployees = new List<Employee>()
         {
-            Name = name;
-            Age = age;
-        }
+            new Employee("Andrea Huber", 24, JobType.Manager, ExperienceLevel.Novice),
+            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate),
+            new Employee("Marie Blanchet", 39, JobType.Storeman, ExperienceLevel.Senior),
+            new Employee("Henry Majors", 44, JobType.Salesperson, ExperienceLevel.Senior),
+        };
+        var employeeRepository = new Mock<IEmployeeRepository>();
+        employeeRepository.Setup(x => x.GetAvailableEmployees()).Returns(repositoryEmployees);
+
+        var sut = new EmployeeReportingService(employeeRepository.Object);
+        sut.RetrieveAvailableEmployees();
+        var employeesAllowedResult = sut.ListEmployeesCashCollecting();
+        sut.FullAgedEmployees.Should().Contain(repositoryEmployees[0]);
+        sut.FullAgedEmployees.Should().Contain(repositoryEmployees[3]);
+
+        employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
 }

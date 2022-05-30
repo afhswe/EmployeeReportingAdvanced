@@ -22,4 +22,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EmployeeReportingAdvanced\EmployeeReportingAdvanced.csproj" />
+  </ItemGroup>
+
 </Project>
