@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Runtime.InteropServices;
 using EmployeeReportingAdvanced;
 
 var employees = new List<Employee>()
@@ -11,7 +12,8 @@ var employees = new List<Employee>()
 };
 
 var employeeRepository = new InMemoryEmployeeRepository(employees);
-var employeeReportingService = new EmployeeReportingService(employeeRepository, null);
+var employeeNotificationService = new ConsoleEmployeeNotificationService();
+var employeeReportingService = new EmployeeReportingService(employeeRepository, employeeNotificationService);
 employeeReportingService.RetrieveAvailableEmployees();
 
 Console.WriteLine("----------------------------------------");

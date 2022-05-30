@@ -31,11 +31,7 @@ public class EmployeeReportingService
 
     private void SendWarningAboutTooFewAvailableEmployees()
     {
-        Console.WriteLine("*********************************************");
-        var message = $"WARNING: only {AllAvailableEmployees.Count} employee(s) available";
-        Console.WriteLine(message);
-        Console.WriteLine("*********************************************");
-
+        var message = $"WARNING: only {AllAvailableEmployees.Count} employee(s) available. Please reach out to +32-6666-6666 immediately upon receiption";
         employeeNotificationService.SendWarningMessage(message);
     }
 

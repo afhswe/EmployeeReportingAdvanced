@@ -20,18 +20,81 @@ public class EmployeeReportingServiceTests
     [Fact]
     public void ListEmployees_ReturnsCorrectEmployees()
     {
-        var repositoryEmployees = new List<Employee>()
+        var sut = CreateEmployeeServiceWithEmployees(new List<Employee>()
         {
-            new Employee("Andrea Huber", 17, JobType.Storeman, ExperienceLevel.Novice),
-            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate),
-        };
-        var sut = CreateEmployeeServiceWithEmployees(repositoryEmployees);
+            ANoviceEmployee(),
+            AnIntermediateEmployee(),
+        });
 
         sut.RetrieveAvailableEmployees();
         var availableEmployeesResult = sut.ListEmployees();
         availableEmployeesResult.Count.Should().Be(2);
-        availableEmployeesResult.Should().ContainEquivalentOf(repositoryEmployees[0]);
-        availableEmployeesResult.Should().ContainEquivalentOf(repositoryEmployees[1]);
+        availableEmployeesResult.Should().ContainEquivalentOf(ANoviceEmployee());
+        availableEmployeesResult.Should().ContainEquivalentOf(AnIntermediateEmployee());
+    }
+
+    [Fact]
+    public void ListEmployeesWeekendWork_ReturnsOnlyEmployees_AllowedToWorkOnWeekends()
+    {
+        var sut = CreateEmployeeServiceWithEmployees(new List<Employee>()
+        {
+            ANoviceEmployee(),
+            AnIntermediateEmployee(),
+            ANoviceSalesperson(),
+            ASeniorSalesperson(),
+        });
+
+        sut.RetrieveAvailableEmployees();
+        var allowedEmployeesResult = sut.ListEmployeesAllowedToWorkOnWeekends();
+        allowedEmployeesResult.Should().ContainEquivalentOf(AnIntermediateEmployee());
+        allowedEmployeesResult.Should().ContainEquivalentOf(ASeniorSalesperson());
+    }
+
+    [Fact]
+    public void ListEmployeesCashCollecting_ReturnsOnlyEmployees_AllowedToCollectCash()
+    {
+        var sut = CreateEmployeeServiceWithEmployees(new List<Employee>()
+        {
+            AManager(),
+            AnIntermediateSalesperson(),
+            ASeniorStoreman(),
+            ASeniorSalesperson(),
+        });
+
+        sut.RetrieveAvailableEmployees();
+
+        var allowedEmployeesResult = sut.ListEmployeesCashCollecting();
+        allowedEmployeesResult.Should().ContainEquivalentOf(AManager());
+        allowedEmployeesResult.Should().ContainEquivalentOf(ASeniorSalesperson());
+    }
+
+    [Fact]
+    public void RetrieveAvailableEmployees_SendsWarningIfTooFewEmployeesAvailable()
+    {
+        var sut = CreateEmployeeServiceWithEmployees(new List<Employee>()
+        {
+            AnEmployee(),
+            AnEmployee()
+        });
+        sut.RetrieveAvailableEmployees();
+
+        employeeNotificationServiceMock.Verify(
+            x => x.SendWarningMessage(It.Is<string>(s => s.Contains("2 employee(s)"))), Times.Once);
+    }
+
+    [Fact]
+    public void RetrieveAvailableEmployees_NoWarningIfEnoughEmployeesAvailable()
+    {
+        var sut = CreateEmployeeServiceWithEmployees(new List<Employee>()
+        {
+            AnEmployee(),
+            AnEmployee(),
+            AnEmployee(),
+            AnEmployee()
+        });
+        sut.RetrieveAvailableEmployees();
+
+        employeeNotificationServiceMock.Verify(x => x.SendWarningMessage(It.IsAny<string>()), Times.Never);
     }
 
     private EmployeeReportingService CreateEmployeeServiceWithEmployees(List<Employee> repositoryEmployees)
@@ -41,53 +104,43 @@ public class EmployeeReportingServiceTests
         return sut;
     }
 
-    [Fact]
-    public void ListEmployeesWeekendWork_ReturnsOnlyEmployees_AllowedToWorkOnWeekends()
+    private Employee ASeniorSalesperson()
     {
-        var repositoryEmployees = new List<Employee>()
-        {
-            new Employee("Andrea Huber", 17, JobType.Storeman, ExperienceLevel.Novice),
-            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate),
-            new Employee("Marie Blanchet", 39, JobType.Salesperson, ExperienceLevel.Novice),
-            new Employee("Henry Majors", 43, JobType.Salesperson, ExperienceLevel.Senior),
-        };
-        var sut = CreateEmployeeServiceWithEmployees(repositoryEmployees);
-
-        sut.RetrieveAvailableEmployees();
-        var allowedEmployeesResult = sut.ListEmployeesAllowedToWorkOnWeekends();
-        allowedEmployeesResult.Should().ContainEquivalentOf(repositoryEmployees[1]);
-        allowedEmployeesResult.Should().ContainEquivalentOf(repositoryEmployees[3]);
+        return new Employee("Henry Majors", 44, JobType.Salesperson, ExperienceLevel.Senior);
     }
 
-    [Fact]
-    public void ListEmployeesCashCollecting_ReturnsOnlyEmployees_AllowedToCollectCash()
+    private Employee ASeniorStoreman()
     {
-        var repositoryEmployees = new List<Employee>()
-        {
-            new Employee("Andrea Huber", 24, JobType.Manager, ExperienceLevel.Novice),
-            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate),
-            new Employee("Marie Blanchet", 39, JobType.Storeman, ExperienceLevel.Senior),
-            new Employee("Henry Majors", 44, JobType.Salesperson, ExperienceLevel.Senior),
-        };
-        var sut = CreateEmployeeServiceWithEmployees(repositoryEmployees);
-
-        sut.RetrieveAvailableEmployees();
-        var allowedEmployeesResult = sut.ListEmployeesCashCollecting();
-        allowedEmployeesResult.Should().ContainEquivalentOf(repositoryEmployees[0]);
-        allowedEmployeesResult.Should().ContainEquivalentOf(repositoryEmployees[3]);
+        return new Employee("Marie Blanchet", 39, JobType.Storeman, ExperienceLevel.Senior);
     }
 
-    [Fact]
-    public void RetrieveAvailableEmployees_SendsWarningIfTooFewEmployeesAvailable()
+    private Employee AnIntermediateSalesperson()
     {
-        var repositoryEmployees = new List<Employee>()
-        {
-            new Employee("Andrea Huber", 24, JobType.Manager, ExperienceLevel.Novice),
-            new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate)
-        };
-        var sut = CreateEmployeeServiceWithEmployees(repositoryEmployees);
-        sut.RetrieveAvailableEmployees();
+        return new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate);
+    }
 
-        employeeNotificationServiceMock.Verify(x => x.SendWarningMessage($"WARNING: only 2 employee(s) available"), Times.Once);
+    private Employee AManager()
+    {
+        return new Employee("Andrea Huber", 24, JobType.Manager, ExperienceLevel.Novice);
+    }
+
+    private Employee AnEmployee()
+    {
+        return new Employee("Andrea Huber", 24, JobType.Manager, ExperienceLevel.Novice);
+    }
+
+    private Employee ANoviceSalesperson()
+    {
+        return new Employee("Marie Blanchet", 39, JobType.Salesperson, ExperienceLevel.Novice);
+    }
+
+    private Employee AnIntermediateEmployee()
+    {
+        return new Employee("Charles Miller", 28, JobType.Salesperson, ExperienceLevel.Intermediate);
+    }
+
+    private Employee ANoviceEmployee()
+    {
+        return new Employee("Andrea Huber", 17, JobType.Storeman, ExperienceLevel.Novice);
     }
 }
