@@ -26,7 +26,7 @@ public class EmployeeReportingService
             .Where(e => e.Age >= 18).ToList();
     }
 
-    public List<Employee> FullAgedEmployees { get; private set; }
+    private List<Employee> FullAgedEmployees { get; set; }
 
     public List<Employee> AllAvailableEmployees { get; private set; }
 
@@ -44,7 +44,7 @@ public class EmployeeReportingService
     public List<Employee> ListEmployeesCashCollecting()
     {
         return FullAgedEmployees
-            .Where(e => (e.ExperienceLevel == ExperienceLevel.Senior && e.JobType == JobType.Storeman) ||
+            .Where(e => (e.ExperienceLevel == ExperienceLevel.Senior && e.JobType == JobType.Salesperson) ||
                         e.JobType == JobType.Manager).ToList();
     }
 }
