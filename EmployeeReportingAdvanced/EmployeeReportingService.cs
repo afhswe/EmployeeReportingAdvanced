@@ -9,7 +9,7 @@ public class EmployeeReportingService
 
     private List<Employee> FullAgedEmployees { get; set; }
 
-    public List<Employee> AllAvailableEmployees { get; private set; }
+    public Dictionary<string, Employee> AllAvailableEmployees { get; private set; }
 
     public EmployeeReportingService(IEmployeeRepository employeeRepository)
     {
@@ -31,7 +31,15 @@ public class EmployeeReportingService
 
     private void SetAvailableEmployees()
     {
-        AllAvailableEmployees = employeeRepository.GetAvailableEmployees().ToList();
+        AllAvailableEmployees = new Dictionary<string, Employee>();
+        var employees = employeeRepository.GetAvailableEmployees();
+        foreach (var employee in employees)
+        {
+            AllAvailableEmployees.Add(
+                employee.Name, 
+                employee
+                );
+        }
     }
 
     private void SetFullAgeEmployees()
@@ -44,7 +52,7 @@ public class EmployeeReportingService
 
     public List<Employee> ListEmployees()
     {
-        return AllAvailableEmployees;
+        return AllAvailableEmployees.Values.ToList();
     }
 
     public List<Employee> ListEmployeesAllowedToWorkOnWeekends()

@@ -24,9 +24,9 @@ public class EmployeeReportingServiceTests
         sut.RetrieveAvailableEmployees();
 
         sut.AllAvailableEmployees.Count.Should().Be(3);
-        sut.AllAvailableEmployees[0].Should().BeSameAs(repositoryEmployees[0]);
-        sut.AllAvailableEmployees[1].Should().BeSameAs(repositoryEmployees[1]);
-        sut.AllAvailableEmployees[2].Should().BeSameAs(repositoryEmployees[2]);
+        sut.AllAvailableEmployees["Emily Bache"].Should().BeSameAs(repositoryEmployees[0]);
+        sut.AllAvailableEmployees["Martin Fowler"].Should().BeSameAs(repositoryEmployees[1]);
+        sut.AllAvailableEmployees["Kent Beck"].Should().BeSameAs(repositoryEmployees[2]);
 
         employeeRepository.Verify(x => x.GetAvailableEmployees(), Times.Exactly(2));
     }
